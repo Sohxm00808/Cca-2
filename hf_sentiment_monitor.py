@@ -1,6 +1,6 @@
 """
-Name : Soham Ashok Jagtap
-PRN  : 1302250127
+Name : abhishak raskar
+PRN  : 1302250009
 Topic: ML Framework - Hugging Face Sentiment Monitor (multiple problem statements)
 
 Uses a Hugging Face pipeline when `transformers` is installed (pip install transformers torch).
@@ -17,8 +17,9 @@ except Exception:
     CLASSIFIER = None
     MODE = "Keyword fallback (transformers not installed)"
 
-POS = {"great", "love", "excellent", "profit", "growth", "smooth", "fast", "helpful", "surge", "gain", "secure"}
-NEG = {"bad", "hate", "poor", "loss", "fraud", "slow", "crash", "scam", "decline", "delay", "hacked", "fail"}
+# Expanded keyword sets for collaborator variant branch
+POS = {"great", "love", "excellent", "profit", "growth", "smooth", "fast", "helpful", "surge", "gain", "secure", "seamless", "happy", "reliable", "quick"}
+NEG = {"bad", "hate", "poor", "loss", "fraud", "slow", "crash", "scam", "decline", "delay", "hacked", "fail", "broken", "buggy", "error"}
 
 
 def classify(text):
@@ -30,57 +31,59 @@ def classify(text):
     return ("POSITIVE", 0.6) if p >= n else ("NEGATIVE", 0.6)
 
 
-# ---- Problem statements: each has its own texts and an alert threshold ----
+# ---- Collaborator Problem Statements & Scenarios ----
 PROBLEMS = {
-    "P1 Financial news monitoring": {
+    "E1 E-commerce & retail orders": {
+        "alert_if_negative_pct": 45,
+        "texts": ["Delivery was extremely fast and packaging was secure.",
+                  "Item arrived broken and customer support refuses to reply.",
+                  "Seamless checkout experience, loved the discounts.",
+                  "Package delayed by a week with zero tracking updates."]},
+    "E2 Stock trading & brokerage platform": {
         "alert_if_negative_pct": 50,
-        "texts": ["Sensex surge as banking stocks post strong profit growth.",
-                  "Fintech startup hit by fraud scandal, shares crash.",
-                  "RBI keeps rates unchanged, markets stay calm and stable.",
-                  "Quarterly loss widens as loan defaults decline recovery."]},
-    "P2 UPI / payment app reviews": {
+        "texts": ["Order execution is lightning fast during market open.",
+                  "App crashed right when I tried to exit my position, huge loss.",
+                  "Charts are smooth and indicators are very helpful.",
+                  "Login error locked me out of my portfolio all morning."]},
+    "E3 Digital wallet & crypto exchange": {
         "alert_if_negative_pct": 40,
-        "texts": ["Payments are fast and the app is smooth, love it.",
-                  "Transaction failed twice and refund was a long delay.",
-                  "Excellent cashback offers and secure login.",
-                  "Customer care is poor, money stuck for days."]},
-    "P3 Bank customer support tickets": {
-        "alert_if_negative_pct": 30,
-        "texts": ["Thanks, the agent was very helpful and solved my issue.",
-                  "Third time complaining, nobody replies, really bad service.",
-                  "Card blocked after suspected fraud, fix this slow process.",
-                  "Loan approval was quick and the process was great."]},
-    "P4 Crypto / social media chatter": {
-        "alert_if_negative_pct": 60,
-        "texts": ["Bitcoin gain continues, community feels bullish and excited.",
-                  "Exchange hacked, users panic and withdraw everything.",
-                  "Another scam token rug pulled investors overnight.",
-                  "Regulation clarity is a great step for the industry."]},
-    "P5 Campus / course feedback": {
+        "texts": ["Easy peer-to-peer transfers with zero fees.",
+                  "Withdrawal stuck in pending status for hours, buggy system.",
+                  "Two-factor authentication setup is very secure and quick.",
+                  "Account flagged for fraud without any explanation."]},
+    "E4 Insurance claim processing": {
         "alert_if_negative_pct": 35,
-        "texts": ["The FinTech lectures were excellent and practical.",
-                  "Timetable clashes and poor lab systems, very bad experience.",
-                  "Python sessions were helpful and well paced.",
-                  "Assignment deadlines are too tight."]},
+        "texts": ["Claim approval was processed smoothly within 24 hours.",
+                  "Endless paperwork delays and poor adjuster communication.",
+                  "Very helpful helpline agent resolved my policy query instantly.",
+                  "Reimbursement claim rejected due to unclear hidden clauses."]},
+    "E5 Online learning management system": {
+        "alert_if_negative_pct": 30,
+        "texts": ["Video streaming is clear and course materials are excellent.",
+                  "Server errors during quiz submissions made me fail.",
+                  "Great instructor feedback on programming assignments.",
+                  "Platform navigation is confusing and slow."]},
 }
 
 
 def main():
-    print(f"Mode: {MODE}\n")
+    print(f"Collaborator Mode: {MODE}\n")
     rows = []
     for name, cfg in PROBLEMS.items():
         results = [classify(t) for t in cfg["texts"]]
         neg = sum(1 for lab, _ in results if lab == "NEGATIVE")
         neg_pct = 100 * neg / len(results)
         alert = "ALERT" if neg_pct >= cfg["alert_if_negative_pct"] else "OK"
-        print(f"== {name} | negative {neg_pct:.0f}% (threshold {cfg['alert_if_negative_pct']}%) -> {alert}")
+        print(f">> {name} | negative {neg_pct:.0f}% (threshold {cfg['alert_if_negative_pct']}%) -> {alert}")
         for t, (lab, sc) in zip(cfg["texts"], results):
-            print(f"   [{lab:8} {sc}] {t}")
+            print(f"    [{lab:8} {sc}] {t}")
             rows.append([name, t, lab, sc, alert])
         print()
-    with open("sentiment_report.csv", "w", newline="", encoding="utf-8") as f:
+        
+    output_file = "sentiment_report_v2.csv"
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerows([["Problem", "Text", "Label", "Score", "Status"]] + rows)
-    print("Saved sentiment_report.csv")
+    print(f"Saved {output_file} successfully.")
 
 
 if __name__ == "__main__":
